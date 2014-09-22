@@ -310,7 +310,7 @@ isPrime n = is_prime 2
   не делятся на 400 (например, годы 300, 1300 и 1900 не являются високосными,
   а 1200 и 2000 — являются).
 -}
-
+nDays :: (Num a, Integral a1) => a -> a1
 nDays year
 	| isLeap = 366
 	| otherwise = 365
