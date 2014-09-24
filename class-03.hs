@@ -96,6 +96,12 @@ nats = iterate (\r -> r + 1) 0
 listEven :: [Integer]
 listEven = iterate (\r -> r + 2) 0
 
+f2c :: [Double]
+f2c = iterate (\r -> (1 + r) / 2) 1
+
+f2d :: [Char]
+f2d = take 26 $ iterate (\r -> chr $ ord r + 1) 'a'
+
 {-
 3. Группировка списков.
   a) Дан список символов. Сгруппировать подряд идущие символы по принципу: цифры — не цифры — ...
