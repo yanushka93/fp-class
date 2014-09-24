@@ -1,3 +1,4 @@
+import Data.Char
 {-
 Явная рекурсия в решениях хотя и допускается, но не приветствуется. Старайтесь обходиться стандартными
 функциями, используя при этом создание функций «на лету». Пытайтесь максимально упростить уже написанные
@@ -17,14 +18,51 @@
 -}
 
 f11a :: Integral a => [a] -> [a]
-f11a = map undefined
+f11a a = map (*2) a
 
+f11b :: Integral b => [b] -> [b]
+f11b a = map (\x -> if odd x then x else 2 * x) a
+
+f11c :: Integral b => [b] -> [b]
+f11c a = map (\x -> if odd x then 0 else x) a
+
+f11d :: Ord a => [a] -> a -> [a]
+f11d a k = filter (<=k) a
+
+
+f11e :: (Num a, Ord a) => [a] -> [a]
+f11e a = filter (<0) a
+
+f11f :: Integral a => [a] -> [a]
+f11f a = filter (\x -> if even x && x > 0 then False else True) a
 {-
  1.2 Дан список декартовых координат точек на плоскости (пар вещественных чисел).
      Преобразовать его следующим образом:
   a) отфильтровать список так, чтобы в нём остались точки из заданной координатной четверти;
   b) преобразовать декартовы координаты в полярные.
 -}
+
+f12a :: (Eq a, Num a, Num a1, Num a2, Ord a1, Ord a2) => [(a1, a2)] -> a -> [(a1, a2)]
+f12a a k = filter (equals) a
+	where 
+		equals (x1, y1) = k == point_position (x1, y1)
+ 		point_position (x1, y1)
+			| x1 >= 0 && y1 >= 0 = 1
+			| x1 < 0 && y1 >= 0 = 2
+			| x1 < 0 && y1 < 0 = 3
+			| x1 >= 0 && y1 < 0 = 4
+			| otherwise = 0
+
+f12b a = map (to_polar) a
+	where
+		to_polar (x, y)
+			| x > 0 && y >= 0 = (radius x y, atan y / x)
+			| x > 0 && y < 0 = (radius x y, atan y / x + 2 * pi)
+			| x < 0 = (radius x y, atan y / x + pi)
+			| x == 0 && y > 0 = (radius x y, pi / 2)
+			| x == 0 && y < 0 = (radius x y, 3 * pi / 2)
+			| otherwise = (radius x y, 0)
+		radius x y = sqrt $ x^2 + y^2
 
 {-
  1.3 Дан список слов.
@@ -34,7 +72,8 @@ f11a = map undefined
 -}
 
 f13a :: [String] -> [String]
-f13a = map undefined
+
+f13a s = map (map toUpper) s
 
 {-
 2. Формирование числовых последовательностей (iterate).
