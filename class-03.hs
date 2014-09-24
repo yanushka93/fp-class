@@ -42,7 +42,7 @@ f11f a = filter (\x -> if even x && x > 0 then False else True) a
   b) преобразовать декартовы координаты в полярные.
 -}
 
-f12a :: (Eq a, Num a, Num a1, Num a2, Ord a1, Ord a2) => [(a1, a2)] -> a -> [(a1, a2)]
+f12a :: (Eq a, Num a2, Num a1, Num a, Ord a2, Ord a1) => [(a1, a2)] -> a -> [(a1, a2)]
 f12a a k = filter (equals) a
 	where 
 		equals (x1, y1) = k == point_position (x1, y1)
@@ -53,6 +53,7 @@ f12a a k = filter (equals) a
 			| x1 >= 0 && y1 < 0 = 4
 			| otherwise = 0
 
+f12b :: (Floating a, Ord a) => [(a, a)] -> [(a, a)]
 f12b a = map (to_polar) a
 	where
 		to_polar (x, y)
@@ -72,8 +73,13 @@ f12b a = map (to_polar) a
 -}
 
 f13a :: [String] -> [String]
-
 f13a s = map (map toUpper) s
+
+f13b :: [String] -> Int -> [String]
+f13b s k = filter (\s -> if length s == k then True else False) s
+
+f13c :: [String] -> Char -> [String]
+f13c s k = filter (\s -> if s /= "" && head s == k then True else False) s
 
 {-
 2. Формирование числовых последовательностей (iterate).
@@ -85,7 +91,10 @@ f13a s = map (map toUpper) s
 -}
 
 nats :: [Integer]
-nats = iterate undefined 0
+nats = iterate (\r -> r + 1) 0
+
+listEven :: [Integer]
+listEven = iterate (\r -> r + 2) 0
 
 {-
 3. Группировка списков.
