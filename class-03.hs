@@ -114,6 +114,8 @@ f2d = take 26 $ iterate (\r -> chr $ ord r + 1) 'a'
   e) Дан список. Определить длину самого длинного подсписка, содержащего подряд идущие одинаковые элементы.
 -}
 
+f3a = groupBy (\x y -> (isDigit x && isDigit y) || (not.isDigit x && not.isDigit y))
+
 f3d :: [a] -> Int -> Int -> [[a]]
 f3d xs n m = undefined
 
