@@ -1,4 +1,5 @@
 import Data.Char
+import Data.List
 {-
 Явная рекурсия в решениях хотя и допускается, но не приветствуется. Старайтесь обходиться стандартными
 функциями, используя при этом создание функций «на лету». Пытайтесь максимально упростить уже написанные
@@ -46,7 +47,9 @@ f12a :: (Eq a, Num a2, Num a1, Num a, Ord a2, Ord a1) => [(a1, a2)] -> a -> [(a1
 f12a a k = filter (equals) a
 	where 
 		equals (x1, y1) = k == point_position (x1, y1)
- 		point_position (x1, y1)
+
+point_position :: (Eq a, Num a2, Num a1, Num a, Ord a2, Ord a1) => (a1, a2) -> a
+point_position (x1, y1)
 			| x1 >= 0 && y1 >= 0 = 1
 			| x1 < 0 && y1 >= 0 = 2
 			| x1 < 0 && y1 < 0 = 3
@@ -114,13 +117,25 @@ f2d = take 26 $ iterate (\r -> chr $ ord r + 1) 'a'
   e) Дан список. Определить длину самого длинного подсписка, содержащего подряд идущие одинаковые элементы.
 -}
 
-f3a = groupBy (\x y -> (isDigit x && isDigit y) || (not.isDigit x && not.isDigit y))
+f3a :: [Char] -> [[Char]]
+f3a = groupBy (\x y -> ((isDigit x) && (isDigit y)) || ((not $ isDigit x) && (not $ isDigit y)))
+
+f3b :: [(Integer, Integer)] -> [[(Integer, Integer)]]
+f3b = groupBy (\x y -> point_position x == point_position y)
+
+f3c :: [a] -> Int -> [[a]]
+f3c [] n = []
+f3c xs n = take n xs : f3c (drop n xs) n
 
 f3d :: [a] -> Int -> Int -> [[a]]
-f3d xs n m = undefined
+f3d [] _ _ = []
+f3d xs n m = take n xs : f3d (drop m xs) n m
+
+f3e :: Eq a => [a] -> Int
+f3e xs = maximum . map  length $ groupBy (==) xs
 
 -- Должно быть True
-test_f3d = f3d [1..10] 4 2 == [[1,2,3,4],[3,4,5,6],[5,6,7,8],[7,8,9,10],[9,10]]
+test_f3d = f3d [1..10] 4 2 == [[1,2,3,4],[3,4,5,6],[5,6,7,8],[7,8,9,10],[9,10]] --correct
 
 {-
 4. Разные задачи.
@@ -134,3 +149,8 @@ test_f3d = f3d [1..10] 4 2 == [[1,2,3,4],[3,4,5,6],[5,6,7,8],[7,8,9,10],[9,10]]
     называется элемент, больший своих соседей.
  e) Дан список. Продублировать все его элементы.
 -}
+
+f4a :: [Char] -> Int
+f4a t = length . filter (isDigit.head) $ groupBy (\x y -> (isDigit x) && (isDigit y)) t
+
+f4e xs = concat $ map (\x -> [x, x]) xs
