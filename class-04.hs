@@ -24,6 +24,35 @@
      функции должно быть значение, возвращаемое по умолчанию).
 -}
 
+f1a = foldl (\sum_even x -> sum_even + if even x then x else 0) 0
+f1atest1 = f1a [1, 3, 4, 12, 0] == 16
+f1atest2 = f1a [1, 11, -13] == 0
+f1atest3 = f1a [0, -2, 4, -6, 8] == 4
+
+f1b = foldl (\(sum, prod) x -> (sum + x, prod * x)) (0, 1)
+f1btest1 = f1b [1, 3, 4, 12, 0] == (20, 0)
+f1btest2 = f1b [1, 11, -13] == (-1, -143)
+f1btest3 = f1b [0, -2, 4, -6, 8] == (4, 0)
+
+f1c xs = sum / len
+	where
+		(sum, len) = foldl (\(s, l) x -> (s + x, l + 1)) (0, 0) xs
+f1ctest1 = f1c [1, 3, 4, 12, 0] == 4.0
+f1ctest2 = f1c [1, 11, -12] == 0
+f1ctest3 = f1c [0, -2, 4, -6, 8] == 0.8
+
+f1d = foldl (\min x -> if x < min then x else min) 999
+f1dtest1 = f1d [1, 3, 4, 12, 0] == 0
+f1dtest2 = f1d [1, 11, -12] == -12
+f1dtest3 = f1d [0, -2, 4, -6, 8] == -6
+
+f1e xs def = if minl == 999 then def else minl
+	where 
+		minl = foldl (\minl x -> if x < minl && odd x then x else minl) 999 xs
+f1etest1 = f1e [1, 3, 4, 12, 0] 0 == 1
+f1etest2 = f1e [1, 11, -12] 0 == 1
+f1etest3 = f1e [0, -2, 4, -6, 8] 0 == 0
+
 {-
  2. Свёртки, формирующие списки
   a) Сформировать список, содержащий каждый второй элемент исходного.
@@ -41,6 +70,33 @@
   n) Даны два списка одинаковой длины. Сформировать список, состоящий из результатов применения
      заданной функции двух аргументов к соответствующим элементам исходных списков.
 -}
+
+f2a = fst.foldr (\x (elems, pos) -> if even pos then (x : elems, pos + 1) else (elems, pos + 1)) ([], 0)
+f2atest1 = f2a [1,2,3,4,5] == [1,3,5]
+f2atest2 = f2a [1, 3, 4] == [1, 4]
+f2atest3 = f2a [1] == [1]
+
+reverse_list = foldl (\elems x -> x : elems) []
+
+f2b n = reverse_list.fst.foldl (\(elems, len) x -> if len < n then (x : elems, len + 1) else (elems, len)) ([], 0)
+f2btest1 = f2b 2 [1,2,3] == [1,2]
+f2btest2 = f2b 0 [1,2,3] == []
+f2btest3 = f2b 5 [1,2,3] == [1,2,3]
+
+f2c n = fst.foldr (\x (elems, len) -> if len < n then (x : elems, len + 1) else (elems, len)) ([], 0)
+f2ctest1 = f2c 2 [1,2,3] == [2,3]
+f2ctest2 = f2c 0 [1,2,3] == []
+f2ctest3 = f2c 5 [1,2,3] == [1,2,3]
+
+f2d = reverse_list.fst.foldl (\(elems, l) x -> if x > l then (x : elems, x) else (elems, x)) ([], -999)
+f2dtest1 = f2d [1,2,3] == [1,2,3]
+f2dtest2 = f2d [1] == [1]
+f2dtest3 = f2d [1,3,1] == [1,3]
+
+f2e = fst.foldr (\x (elems, (c, l)) -> if c < x && c < l then (c : elems, (x, c)) else (elems, (x, c))) ([], (-999, -999))
+f2etest1 = f2e [1,2,3] == []
+f2etest2 = f2e [1,2,1,2] == [1]
+f2etest3 = f2e [1,0,1,-1,1] == [0,-1]
 
 {-
  3. Использование свёртки как носителя рекурсии (для запуска свёртки можно использовать список типа [1..n]).
