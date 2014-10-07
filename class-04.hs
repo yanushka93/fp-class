@@ -98,6 +98,32 @@ f2etest1 = f2e [1,2,3] == []
 f2etest2 = f2e [1,2,1,2] == [1]
 f2etest3 = f2e [1,0,1,-1,1] == [0,-1]
 
+f2f = foldr (\str (word:words) -> if str == ' ' then if word == [] then (word:words) else ([] : word : words) else (([str] ++ word) : words)) [[]]
+f2ftest1 = f2f "asd  as a " == ["asd","as","a"]
+f2ftest2 = f2f " " == []
+f2ftest3 = f2f "" == []
+
+f2g n list = reverse_list . fst $ foldl (\(x : xs, len) el -> if len == 0 then ([el] : x : xs, n - 1) else ((x ++ [el]) : xs, len - 1)) ([[]], n) list
+f2gtest1 = f2g 3 [1,2,3,4,5,6,7,1,2,3] == [[1,2,3],[4,5,6],[7,1,2],[3]]
+f2gtest2 = f2g 3 [1] == [[1]]
+f2gtest3 = f2g 1 [1,2,3,4] == [[1],[2],[3],[4]]
+
+f2k pred = foldr (\x xs -> if pred x then (x:xs) else xs) []
+f2ktest1 = f2k (<3) [1,2,3,4] == [1,2]
+f2ktest2 = f2k (even) [1,2,3,4] == [2,4]
+f2ktest3 = f2k (\(x,y) -> x*y > 0) [(-1,2),(0,0),(1,4),(-1,-3)] == [(1,4),(-1,-3)]
+
+f2l n = foldr (\x xs -> repeat_n x ++ xs) []	
+	where 
+		repeat_n el = foldl (\xs x -> el : xs) [] [1..n]
+f2ltest1 = f2l 2 [1,2] == [1,1,2,2]
+f2ltest2 = null $ f2l 0 [1,2]
+f2ltest3 = null $ f2l 3 []
+
+f2m list = reverse_list $ foldl (\(b:xs) x -> if x == b then (b:xs) else (x : b : xs)) [head list] list
+f2mtest1 = f2m [1,2,3] == [1,2,3]
+f2mtest2 = f2m [1,1,1,1,1,1] == [1]
+f2mtest3 = f2m [1,1,2,2,3,2,3,5,6,1,1] == [1,2,3,2,3,5,6,1]
 {-
  3. Использование свёртки как носителя рекурсии (для запуска свёртки можно использовать список типа [1..n]).
   a) Найти сумму чисел от a до b.
@@ -108,6 +134,36 @@ f2etest3 = f2e [1,0,1,-1,1] == [0,-1]
   e) Проверить, является ли заданное целое число простым.
 -}
 
+f3a a b = foldl (\sum x -> sum + x) 0 [a..b]
+f3atest1 = f3a 1 3 == 6
+f3atest2 = f3a 1 1 == 1
+f3atest3 = f3a 0 4 == 10
+
+f3b a b = fst $ foldl (\(sum,pred) x -> (sum + pred * x, pred * x)) (0,1) [a..b]
+f3btest1 = f3b 1 3 == 9
+f3btest2 = f3b 1 1 == 1
+f3btest3 = f3b 10 20 == 7058331939240
+
+take' n = reverse_list.fst.foldl (\(xs, len) x -> if len == 0 then (xs,0) else (x:xs, len - 1)) ([],n)
+
+f3c n = take' n $ reverse_list $ foldl (\(x1:x2:xs) x -> (x1 + x2 : x1 : x2 : xs)) [1,1] [1..n-2]
+f3ctest1 = f3c 0 == []
+f3ctest2 = f3c 1 == [1]
+f3ctest3 = f3c 5 == [1,1,2,3,5]
+
+f3d x n = fst $ foldl (\(val,fact) k -> (val + ((fn k) * fact * x / k), fact * x / k)) (0,1) [1..n]
+	where 
+		fn p
+			| p `mod` 4 == 0 = sin x
+			| p `mod` 4 == 1 = cos x
+			| p `mod` 4 == 2 = (-1) * sin x
+			| p `mod` 4 == 3 = (-1) * cos x
+
+f3e x = foldl (\prime k -> prime && (mod x k /= 0)) True [2..floor $ sqrt $ fromIntegral  x]
+f3etest1 = f3e 3 == True
+f3etest2 = f3e 6 == False
+f3etest3 = f3e 936 == False
+			
 {-
  4. Решить задачу о поиске пути с максимальной суммой в треугольнике (см. лекцию 3) при условии,
    что необходимо дополнительно найти сам путь (к примеру, в виде закодированных направлений спуска:
