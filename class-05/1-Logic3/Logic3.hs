@@ -10,7 +10,7 @@ module Logic3 where
 data Logic3 = T -- Истина
             | U -- Неизвестно
             | F -- Ложь
-            deriving(Eq)
+            deriving(Show, Eq)
 
 {-
   2. Реализовать логическую операцию not3, определяемую таблицей:
@@ -31,7 +31,9 @@ data Logic3 = T -- Истина
 -}
 
 not3 :: Logic3 -> Logic3
-not3 = undefined
+not3 T = U
+not3 U = F
+not3 F = T
 
 {-
   3. Реализовать логические операции \/ (дизъюнкция) и /\ (конъюнкция), определяемые следующими
@@ -47,28 +49,55 @@ not3 = undefined
 -}
 
 (\/) :: Logic3 -> Logic3 -> Logic3
-a \/ b = undefined
+T \/ _ = T
+_ \/ T = T
+F \/ b = b
+a \/ F = a
+U \/ T = T
+U \/ U = U
+
 
 (/\) :: Logic3 -> Logic3 -> Logic3
-a /\ b = undefined
+T /\ b = b
+a /\ T = a
+F /\ _ = F
+_ /\ F = F
+U /\ U = U
 
 -- 4. Реализовать аналоги стандартных функций and, or, any, all для случая трёхзначной логики.
 
 and3, or3 :: [Logic3] -> Logic3
-and3 = undefined
-or3 = undefined
+and3 = foldl (\val x -> val /\ x) T
+or3 = foldl (\val x -> val \/ x) F
+
+fortest :: Integral a => a -> Logic3
+fortest x 
+	| x `mod` 3 == 0 = T
+	| x `mod` 3 == 1 = U
+	| otherwise = F
 
 any3, all3 :: (a -> Logic3) -> [a] -> Logic3
-any3 = undefined
-all3 = undefined
+any3 f = foldl (\val x -> val \/ f x) F
+all3 f = foldl (\val x -> val /\ f x) T
 
 {-
   5. Перебирая все возможные значения логической переменной, доказать тождественную истинность
   следующей формулы (закон исключённого четвёртого): x \/ not3 x \/ not3 (not3 x).
 -}
 
+tolog3 a
+	| a == 0 = T
+	| a == 1 = U
+	| otherwise = F
+
 excluded_fourth :: Logic3
-excluded_fourth = undefined
+excluded_fourth = foldl (\val x -> tolog3 x \/ (not3 $ tolog3 x) \/ (not3 $ not3 $ tolog3 x)) F [0..2]
+	where
+		tolog3 a
+			| a == 0 = T
+			| a == 1 = U
+			| otherwise = F
+
 
 -- Должно быть True
 test_excluded_fourth = excluded_fourth == T
