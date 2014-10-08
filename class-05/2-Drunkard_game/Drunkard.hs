@@ -7,16 +7,34 @@ module Drunkard where
   учитывая, что всего в колоде 52 карты.
 -}
 
-data Suit
+data Suit = Spades 
+	| Clubs 
+	| Diamonds 
+	| Hearts
+	deriving (Show, Eq, Ord)
 
-data Value
 
-data Card = Card Value Suit
+data Value = Two
+	| Three
+	| Four
+	| Five
+	| Seven 
+	| Eight 
+	| Nine 
+	| Ten 
+	| Jack 
+	| Queen 
+	| King 
+	| Ace
+	deriving (Show, Eq, Ord)
+
+
+type Card = (Value, Suit)
 
 -- 2. Определить функцию, проверяющую, что две переданные ей карты одной масти.
 
 sameSuit :: Card -> Card -> Bool
-sameSuit = undefined
+sameSuit (_, s1) (_, s2) = s1 == s2
 
 {-
   3. Определить функцию, проверяющую, что переданная ей первой карта старше второй
@@ -25,7 +43,7 @@ sameSuit = undefined
 -}
 
 beats :: Card -> Card -> Ordering
-c1 `beats` c2 = undefined
+(v1, _) `beats` (v2, _) = compare v1 v2
 
 {-
   4. Определить функцию, которая по паре списков карт возвращает новую пару списков карт
