@@ -8,9 +8,17 @@
      ghci> :main 1000 "Привет, мир" hello.txt
 -}
 import System.Environment
+import Control.Monad
+import System.IO
 
 createFile :: Int -> String -> FilePath -> IO ()
-createFile n s fname = undefined
+createFile n s fname = withFile fname WriteMode (\handle -> do
+	writeLines n s handle)
+
+writeLines 1 s handle = hPutStrLn handle s
+writeLines n s handle = do
+	hPutStrLn handle s
+	writeLines (n - 1) s handle
 
 main = do
   [n_str, text, fname] <- getArgs

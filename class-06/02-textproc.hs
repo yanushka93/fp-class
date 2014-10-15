@@ -13,4 +13,10 @@
   командной строки.
 -}
 
-main = undefined
+import System.Environment
+
+doOperation op args = args
+
+main = do
+	(op : args) <- getArgs
+	doOperation op args
