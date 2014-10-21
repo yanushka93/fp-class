@@ -20,7 +20,7 @@ main = do
 	
 doOperations "1" file = generatePointFile file
 doOperations "2" file = getCountPointsInQuarters file
---doOperations "2" file = getFarPoint file
+doOperations "3" file = getFarPoint file
 
 generatePointFile file = do
 	gen <- getStdGen
@@ -38,7 +38,9 @@ countPointsInQuarters (c1, c2, c3, c4) (x, y)
 	| x < 0 && y < 0 = (c1, c2, c3 + 1, c4)
 	| otherwise = (c1, c2, c3, c4 + 1)
 	
-checkDistant (x1, y1) (x2, y2) = ((x1^2) + (y1 ^2)) < ((x2^2) + (y2^2))
+checkDistant p1 p2 = if distant p1 < distant p2 then p2 else p1
+	where
+		distant (x, y) = (x^2) + (y^2)
 
 getFarPoint file = do
 	contents <- readFile file
