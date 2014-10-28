@@ -4,4 +4,14 @@
   в заданных текстовых файлах.
 -}
 
-main = undefined
+import System.Environment
+import qualified Data.IntSet as Set
+
+readNumFile filename = do
+	content <- readFile filename
+	return $ map read $ concatMap words $ lines content
+
+solve lists = (length list, sum list)
+	where list = Set.toList $ foldl1 Set.intersection $ map Set.fromList lists
+
+main = getArgs >>= mapM readNumFile >>= print.solve

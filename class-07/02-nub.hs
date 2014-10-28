@@ -11,7 +11,6 @@ import qualified Data.IntSet as Set
 import Data.Array.IArray
 import System.Environment
 import Control.Monad
-import Control.Monad
 
 nub_set :: Set.IntSet -> Int
 nub_set = Set.size
