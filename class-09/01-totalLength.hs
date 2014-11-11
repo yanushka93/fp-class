@@ -1,11 +1,12 @@
 import System.Environment
+import Data.Functor
 
 {-
   Написать функцию, которая по заданному списку строк возвращает сумму длин всех строк.
 -}
 
 totalLength :: [String] -> Int
-totalLength = undefined
+totalLength = foldl (\len x -> len + length x) 0
 
 {-
   Написать функцию, которая по заданному символу и целому числу n строит список строк,
@@ -13,8 +14,9 @@ totalLength = undefined
 -}
 
 build1 :: Char -> Int -> Maybe [String]
-build1 = undefined
-
+build1 c n
+	| n == 0 = Nothing
+	| otherwise = fmap (map (\count -> replicate count c)) (Just [1..n])
 {-
   Написать функцию, аналогичную по возможностям функции build1, но возвращающую при этом
   значение Either String [String], в котором значение слева должно свидетельствовать об
@@ -25,7 +27,11 @@ build1 = undefined
 -}
 
 build2 :: Char -> Int -> Either String [String]
-build2 = undefined
+build2 c n
+	| n == 0 = Left "n = 0"
+	| n > 100 = Left "n > 100"
+	| c == 'c' = Left "CPS prohibits create lines of an 'x'"
+	| otherwise = fmap (map (\count -> replicate count c)) (Right [1..n])
 
 {-
   Параметрами командной строки являются имя файла, символ, целое число.
@@ -40,4 +46,12 @@ build2 = undefined
 -}
 
 main = do
-  undefined
+	t1 <- fmap totalLength getArgs
+	putStrLn $ "Task 1 (total length of args) = " ++ show t1
+	(filename : c : n : _) <- getArgs
+	t2 <- fmap (totalLength . words) (readFile filename)
+	putStrLn $ "Task 2 (total length of file) = " ++ show t2
+	
+	putStrLn $ "Task3.1 (total length of build1) = " ++ show (fmap totalLength $ build1 (head c) (read n))
+	
+	putStrLn $ "Task3.2 (total length of build2) = " ++ show (fmap totalLength $ build2 (head c) (read n))
