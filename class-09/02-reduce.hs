@@ -1,4 +1,5 @@
 import System.Environment
+import System.Random
 
 {-
   Напишите функцию reduce, принимающую один целочисленный аргумент a и возвращающую 0,
@@ -7,7 +8,10 @@ import System.Environment
 -}
 
 reduce :: Integral a => a -> a
-reduce = undefined
+reduce a
+	| a `mod` 3 == 0 = 0
+	| odd a = a * a
+	| otherwise = a * a * a
 
 {-
   Напишите функцию, применяющую функцию reduce заданное количество раз к значению в контексте,
@@ -15,7 +19,7 @@ reduce = undefined
 -}
 
 reduceNF :: (Functor f, Integral a) => Int -> f a -> f a
-reduceNF = undefined
+reduceNF n f = foldl (\val _ -> fmap reduce val) f [1..n]
 
 {-
   Реализуйте следующие функции-преобразователи произвольным, но, желательно, осмысленным и
@@ -23,17 +27,23 @@ reduceNF = undefined
 -}
 
 toList :: Integral a => [(a, a)]  -> [a]
-toList = undefined
+toList = map (\(x, y) -> y)
 
 toMaybe :: Integral a => [(a, a)]  -> Maybe a
-toMaybe = undefined
+toMaybe [] = Nothing
+toMaybe list = Just (head $ toList list)
 
 toEither :: Integral a => [(a, a)]  -> Either String a
-toEither = undefined
+toEither [] = Left "empty"
+toEither list = Right (head $ toList list)
 
 -- воспользуйтесь в этой функции случайными числами
-toIO :: Integral a => [(a, a)]  -> IO a
-toIO = undefined
+toIO :: (Random a, Integral a) => [(a, a)]  -> IO a
+toIO [] = return 0
+toIO list = do
+	gen <- newStdGen
+	let x = fst $ randomR (1, 99) gen
+	return $ max x (head $ toList list)
 
 {-
   В параметрах командной строки задано имя текстового файла, в каждой строке
@@ -45,19 +55,47 @@ toIO = undefined
 -}
 
 parseArgs :: [String] -> (FilePath, Int)
-parseArgs = undefined
+parseArgs (filename : n : _ )= (filename, read n)
 
+toPair (x : y : _) = (read x :: Int, read y :: Int)
+			
 readData :: FilePath -> IO [(Int, Int)]
-readData = undefined
+readData filename = do
+	content <- readFile filename
+	return $ map (toPair . words) (lines content)
+		
 
 main = do
   (fname, n) <- parseArgs `fmap` getArgs
   ps <- readData fname
-  undefined
+  print ps
+  print $ reduceNF n (toList ps)
+  print $ reduceNF n (toMaybe ps)
   print $ reduceNF n (toEither ps)
   reduceNF n (toIO ps) >>= print
 
 {-
   Подготовьте несколько тестовых файлов, демонстрирующих особенности различных контекстов.
   Скопируйте сюда результаты вызова программы на этих файлах.
+  
+	text1.txt 4
+	[(-8,5),(9,6),(2,1)]
+	[152587890625,0,1]
+	Just 152587890625
+	Right 152587890625
+	4808171226659346945
+  
+	test2.txt 4
+	[]
+	[]
+	Nothing
+	Left "empty"
+	0
+	
+	test3.txt 3
+	[(3,0),(1,8),(0,0)]
+	[0,0,0]
+	Just 0
+	Right 0
+	390625
 -}
