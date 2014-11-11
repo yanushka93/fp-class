@@ -1,5 +1,6 @@
 import System.Environment
 import Data.Monoid
+import Data.Maybe
 
 {-
   Некоторый датчик генерирует по пять сигналов в сутки, часть из которых
@@ -15,12 +16,13 @@ type SensorData = [SensorValue]
    значений, полученных от датчика. -}
 
 getData :: String -> SensorData
-getData = undefined . lines
+getData content = map (\val -> if val == "-" then Nothing else (Just (read val))) (lines content)
 
 {- Напишите функцию, группирующую данные по суткам. -}
 
 dataByDay :: SensorData -> [SensorData]
-dataByDay = undefined
+dataByDay [] = []
+dataByDay sdata = (take 5 sdata) : (dataByDay $ drop 5 sdata)
 
 {-
   Посчитайте минимальное значение среди показаний датчика,
@@ -36,7 +38,8 @@ dataByDay = undefined
 -}
 
 minData1 :: Bool -> [SensorData] -> Int
-minData1 needFirst = minimum . undefined
+minData1 True sdata = minimum $ map (fromJust . getFirst . mconcat . map First) $ filter (any isJust) sdata
+minData1 False sdata = minimum $ map (fromJust . getLast . mconcat . map Last) $ filter (any isJust) sdata
 
 {-
   Посчитайте минимальное значение среди данных,
@@ -52,14 +55,20 @@ minData1 needFirst = minimum . undefined
 -}
 
 minData2 :: Bool -> [SensorData] -> Int
-minData2 needSum = minimum . undefined
+minData2 True sdata = minimum $ map (\vals -> getSum . mconcat . map Sum $ map (fromMaybe 0) vals) $ filter (any isJust) sdata
+minData2 False sdata = minimum $ map (\vals -> getProduct . mconcat . map Product $ map (fromMaybe 1) vals) $ filter (any isJust) sdata
 
 {- Попробуйте объединить две предыдущие функции в одну. -}
 
 data SensorTask = NeedFirst | NeedLast | NeedSum | NeedProduct
 
 minData :: SensorTask -> [SensorData] -> Int
-minData st = minimum . undefined
+minData st  sdata = minimum $ getResult st
+	where
+		getResult NeedFirst = map (fromJust . getFirst . mconcat . map First) $ filter (any isJust) sdata
+		getResult NeedLast = map (fromJust . getLast . mconcat . map Last) $ filter (any isJust) sdata
+		getResult NeedSum = map (\vals -> getSum . mconcat . map Sum $ map (fromMaybe 0) vals) $ filter (any isJust) sdata
+		getResult NeedProduct = map (\vals -> getProduct . mconcat . map Product $ map (fromMaybe 1) vals) $ filter (any isJust) sdata
 
 {-
   Пользуясь моноидами All, Any и любыми другими, выясните следующую информацию:
@@ -74,7 +83,21 @@ minData st = minimum . undefined
   Постарайтесь ответить на все вопросы, написав одну функцию.
 -}
 
+getSensorInfo 1 sData _ = length $ filter (== True) $ map (getAll . mconcat . map (All . isNothing)) sData
+getSensorInfo 2 sData _ = length $ filter (== True) $ map (getAll . mconcat . map (All . isJust)) sData
+getSensorInfo 3 sData _ = length $ filter (== True) $ map (getAny . mconcat . map (Any . isJust)) sData
+getSensorInfo 4 sData n = length $ filter (> n) $ map (getSum . mconcat . map (Sum . fromJust) . filter isJust) sData
+getSensorInfo 5 sData n = length $ filter (> n) $ map (getProduct . mconcat . map (Product . fromJust) . filter isJust) sData
+getSensorInfo 6 sData n = length $ filter (>n) $ map (fromJust. getFirst . mconcat . map First $) $ filter (any isJust) sData
+getSensorInfo 7 sData n = length $ filter (>n) $ map (fromJust. getLast . mconcat . map Last $) $ filter (any isJust) sData
+
 main = do
-  fname <- head `fmap` getArgs
-  sData <- getData `fmap` readFile fname
-  undefined
+	fname <- head `fmap` getArgs
+	sData <- fmap (dataByDay . getData) (readFile fname)
+	putStrLn $ "No data = " ++ (show $ getSensorInfo 1 sData 0)
+	putStrLn $ "All data = " ++ (show $ getSensorInfo 2 sData 0)
+	putStrLn $ "Any data = " ++ (show $ getSensorInfo 3 sData 0)
+	putStrLn $ "Sum > 50 = " ++ (show $ getSensorInfo 4 sData 50)
+	putStrLn $ "Product > 1000 = " ++ (show $ getSensorInfo 5 sData 1000)
+	putStrLn $ "First > 10 = " ++ (show $ getSensorInfo 6 sData 10)
+	putStrLn $ "Last > 1000 = " ++ (show $ getSensorInfo 7 sData 5)
