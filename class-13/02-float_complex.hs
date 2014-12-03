@@ -1,10 +1,16 @@
 import Parser
 import SimpleParsers
 import ParseNumbers
+import Control.Applicative hiding (many, optional)
+import Control.Monad
+import Data.Char
 
 {- Напишите парсер для вещественных чисел. -}
+
 float :: Parser Float
-float = undefined
+float = (*) <$> integer <*> ((*) <$> point <*> (1 / integer))
+	where
+		point = char '.' >> return 1
 
 {-
   Напишите парсер для представления комплексных чисел,
