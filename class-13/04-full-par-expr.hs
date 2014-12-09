@@ -22,7 +22,7 @@ digit ::=  '0' | '1' | '2' | ... | '9'
 -}
 
 expr :: Parser Expr
-expr = token (constant <|>  bracket "(" ")"  binary)
+expr = token (constant <|>  bracket "(" ")"  (binary <|> constant))
   where
     constant = Con `liftM` natural
     binary = do

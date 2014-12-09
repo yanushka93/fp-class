@@ -11,8 +11,12 @@ import Control.Monad
    проанализировать).
 -}
 
-data Expr = Con Int | Bin Op Expr Expr
+data Expr = Con Number | Bin Op Expr Expr
   deriving Show
+
+data Number = I Int | F Float | Complex (Float, Float)
+	deriving Show
+
 data Op = Plus | Minus | Mul | Div
   deriving Show
 
@@ -37,6 +41,6 @@ expr = token (term >>= rest addop term)
     binop (s1, cons1) (s2, cons2) =
           (symbol s1 >> return cons1) <|>
           (symbol s2 >> return cons2)
-    constant = Con `liftM` natural
+    constant = Con `liftM` (Complex `liftM` complex <|> F `liftM` float <|> I `liftM` natural)
 
 

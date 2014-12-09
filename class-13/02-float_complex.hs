@@ -2,15 +2,20 @@ import Parser
 import SimpleParsers
 import ParseNumbers
 import Control.Applicative hiding (many, optional)
-import Control.Monad
-import Data.Char
 
 {- Напишите парсер для вещественных чисел. -}
 
 float :: Parser Float
-float = (*) <$> integer <*> ((*) <$> point <*> (1 / integer))
+float = ((*) <$> minus <*> floatNumber) <|> fromIntegral <$> integer
 	where
-		point = char '.' >> return 1
+		floatNumber = do
+			x <- natural
+			char '.'
+			y <- natural
+			return $ fromIntegral x + (fromIntegral y / 10 ^ countDigits y)
+		minus = (char '-' >> return (-1)) <|> return 1
+		countDigits 0 = 0
+		countDigits x = 1 + countDigits (x `div` 10)
 
 {-
   Напишите парсер для представления комплексных чисел,
@@ -19,14 +24,18 @@ float = (*) <$> integer <*> ((*) <$> point <*> (1 / integer))
   
 -}
 complex :: Parser (Float, Float)
-complex = undefined
+complex = bracket "(" ")" $ do
+	a <- token float
+	char ','
+	i <- token float
+	return (a, i)
 
 {-
   Напишите парсер для списка комплексных чисел (разделитель — точка с запятой),
   заключённого в квадратные скобки.
 -}
 complexList :: Parser [(Float, Float)]
-complexList = undefined
+complexList = bracket "[" "]" $ sepBy (token complex) (symbol ";")
 
 {-
   Модифицируйте предыдущий парсер таким образом, чтобы в исходной строке
@@ -34,7 +43,11 @@ complexList = undefined
   при этом должна считаться равной нулю).
 -}
 complexList2 :: Parser [(Float, Float)]
-complexList2 = undefined
+complexList2 = bracket "[" "]" $ sepBy (token complex <|> complexFromFloat) (symbol ";")
+	where
+		complexFromFloat = do
+			val <- token float
+			return (val, 0)
 
 {-
    Модифицируйте предыдущий парсер таким образом, чтобы компоненты списка
@@ -42,6 +55,10 @@ complexList2 = undefined
    требуемое с помощью вспомогательных парсеров, допускающих повторное применение.
 -}
 complexList3 :: Parser [(Float, Float)]
-complexList3 = undefined
+complexList3 = bracket "[" "]" $ sepBy (token complex <|> complexFromFloat) (symbol ",")
+	where
+		complexFromFloat = do
+			val <- token float
+			return (val, 0)
 
 

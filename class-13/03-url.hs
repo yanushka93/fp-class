@@ -2,6 +2,8 @@ import Parser
 import SimpleParsers
 import Control.Applicative hiding (many, optional)
 import Control.Monad
+import Data.List
+import Data.Maybe
 
 {-
    Определите тип данных, представляющий адрес URL следующего вида:
@@ -16,9 +18,16 @@ import Control.Monad
 
 data Scheme = FTP | HTTP | HTTPS | Unk String
               deriving Show
+
+type Login = String
+type Password = String
 type Server = String
+type Port = String
 type Path = String
-data URL = URL Scheme Server Path
+type Params = String
+type Anchor = String
+
+data URL = URL Scheme (Login, Password) Server Port Path Params Anchor
            deriving Show
 
 scheme = (string "https" >> return HTTPS) <|>
@@ -26,7 +35,42 @@ scheme = (string "https" >> return HTTPS) <|>
          (string "ftp" >> return FTP) <|>
          Unk `liftM` lowers
 
+user = userWithPass <|> userWithoutPass
+	
+userWithoutPass = do
+	login <- many1 (sat (/= '@'))
+	char '@'
+	return (login, "")
+	
+userWithPass = do
+	login <- many1 (sat (/= ':'))
+	char ':'
+	password <- many1 (sat (/= '@'))
+	char '@'
+	return (login, password)
+	
+server :: Parser Server
+server = many1 (sat (\c -> isNothing $ elemIndex c ":/"))
+
+port :: Parser Port
+port = char ':' >> many (sat (/= '/'))
+
+path :: Parser Path
+path = char '/' >> many1 (sat (\c -> isNothing $ elemIndex c "?#"))
+
+params :: Parser Params
+params = char '?' >> many1 (sat (/= '#'))
+
+anchor :: Parser Anchor
+anchor = char '#' >> many (sat $ const True)
+
 url = URL <$>
-      scheme <*>
-      (string "://" >> many1 (sat (/='/'))) <*>
-      many (sat $ const True)
+	scheme <*>
+	(string "://" >> optional ("", "") user) <*>
+	server <*>
+	(optional "" port) <*>
+	(optional "" path) <*>
+	(optional "" params) <*>
+	(optional "" anchor)
+	  
+      
